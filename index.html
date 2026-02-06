@@ -168,8 +168,9 @@ document.getElementById("yes").addEventListener("click", () => {
     message.textContent = "🌙💖 J’étais sûr(e) que tu dirais OUI 💖🌙";
 });
 
-// 🔊 Lecture musique dès le premier tap/clic (mobile + PC)
+// 🔊 Lecture musique dès le premier tap/clic (mobile + PC), à partir de 15 secondes
 function startMusic() {
+    music.currentTime = 15; // saute les 15 premières secondes
     music.play().catch(() => {});
     document.body.removeEventListener('click', startMusic);
     document.body.removeEventListener('touchend', startMusic);
@@ -177,9 +178,12 @@ function startMusic() {
 document.body.addEventListener('click', startMusic);
 document.body.addEventListener('touchend', startMusic); // plus fiable sur mobile
 
-// Forcer lecture dès que le fichier est prêt (optionnel)
+// Forcer lecture dès que le fichier est prêt
 music.addEventListener('canplaythrough', () => {
-    music.play().catch(() => {});
+    if (music.currentTime < 15) { 
+        music.currentTime = 15;
+        music.play().catch(() => {});
+    }
 });
 
 // CŒURS animés
