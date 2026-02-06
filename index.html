@@ -16,7 +16,7 @@ body {
     justify-content: center;
     align-items: center;
     color: #eee;
-    touch-action: manipulation; /* améliore le touch sur mobile */
+    touch-action: manipulation;
 }
 
 /* CŒURS */
@@ -41,6 +41,8 @@ body {
     text-align: center;
     box-shadow: 0 15px 40px rgba(0,0,0,0.6);
     z-index: 2;
+    opacity: 0;
+    transition: opacity 1s ease-in-out;
 }
 
 h1 {
@@ -85,6 +87,7 @@ button {
     position: absolute;
 }
 
+/* PHOTO */
 .photo {
     display: none;
     margin-top: 15px;
@@ -96,24 +99,87 @@ button {
     border-radius: 15px;
     margin-top: 10px;
 }
+
+/* Overlay mot de passe */
+#passwordOverlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    z-index: 9999;
+    opacity: 1;
+    transition: opacity 1s ease-in-out; /* <-- transition du fade-out */
+}
+
+#passwordOverlay input {
+    padding: 12px 20px;
+    border-radius: 25px;
+    border: none;
+    margin-top: 15px;
+    font-size: 16px;
+    width: 80%;
+    max-width: 250px;
+    text-align: center;
+    background: #333;
+    color: #eee;
+}
+
+#passwordOverlay button {
+    margin-top: 15px;
+    padding: 12px 25px;
+    border-radius: 25px;
+    border: none;
+    cursor: pointer;
+    background: linear-gradient(135deg, #ff4d6d, #ff85a1);
+    color: white;
+    font-size: 16px;
+    box-shadow: 0 8px 20px rgba(255,77,109,0.4);
+}
+
+/* Message d'erreur */
+#errorMessage {
+    color: #ff6b6b;
+    margin-top: 10px;
+    font-size: 14px;
+    min-height: 20px;
+    animation: blink 1s infinite;
+    font-weight: bold;
+}
+
+@keyframes blink {
+    0%, 50%, 100% { opacity: 1; }
+    25%, 75% { opacity: 0.3; }
+}
 </style>
 </head>
 
 <body>
+
+<!-- Overlay mot de passe -->
+<div id="passwordOverlay">
+    <h2>Entrez le mot de passe pour accéder 💖</h2>
+    <input type="password" id="passwordInput" placeholder="Mot de passe">
+    <button id="passwordBtn">Accéder</button>
+    <div id="errorMessage"></div>
+</div>
 
 <audio id="music" loop preload="auto">
     <source src="./music.mp3" type="audio/mpeg">
     Votre navigateur ne supporte pas la lecture audio.
 </audio>
 
-<div class="container">
+<div class="container" id="mainContent">
     <h1>Veux-tu être ma Valentine ? 🌙💖</h1>
     <div id="message">Sous la lune… fais ton choix ✨</div>
 
-    <!-- Bouton OUI fixe -->
     <button id="yes">Oui 💘</button>
 
-    <!-- Zone de jeu pour NON -->
     <div class="playground" id="playground">
         <button id="no">Non 😏</button>
     </div>
@@ -125,6 +191,15 @@ button {
 </div>
 
 <script>
+const PASSWORD = "1234"; // change ton mot de passe ici
+const passwordOverlay = document.getElementById("passwordOverlay");
+const passwordInput = document.getElementById("passwordInput");
+const passwordBtn = document.getElementById("passwordBtn");
+const errorMessage = document.getElementById("errorMessage");
+
+const mainContent = document.getElementById("mainContent");
+mainContent.style.display = "none";
+
 const noBtn = document.getElementById("no");
 const playground = document.getElementById("playground");
 const message = document.getElementById("message");
@@ -139,6 +214,27 @@ const texts = [
     "Avoue… c’est mignon 😍",
     "Bon… on arrête là 😳"
 ];
+
+// Vérifier mot de passe
+passwordBtn.addEventListener("click", () => {
+    if(passwordInput.value === PASSWORD){
+        // Fade-out overlay
+        passwordOverlay.style.opacity = 0;
+
+        // Attendre la fin du fade avant de cacher complètement
+        setTimeout(() => {
+            passwordOverlay.style.display = "none";
+            mainContent.style.display = "block";
+
+            // fade-in
+            setTimeout(() => { mainContent.style.opacity = 1; }, 50);
+        }, 1000);
+
+        errorMessage.textContent = "";
+    } else {
+        errorMessage.textContent = "💔 Mot de passe incorrect 💔";
+    }
+});
 
 // Bouton NON qui fuit
 function moveButton() {
@@ -168,23 +264,15 @@ document.getElementById("yes").addEventListener("click", () => {
     message.textContent = "🌙💖 J’étais sûr(e) que tu dirais OUI 💖🌙";
 });
 
-// 🔊 Lecture musique dès le premier tap/clic (mobile + PC), à partir de 15 secondes
+// 🔊 Lecture musique dès le premier tap/clic sur le contenu, à partir de 15 secondes
 function startMusic() {
-    music.currentTime = 15; // saute les 15 premières secondes
+    music.currentTime = 15;
     music.play().catch(() => {});
-    document.body.removeEventListener('click', startMusic);
-    document.body.removeEventListener('touchend', startMusic);
+    mainContent.removeEventListener('click', startMusic);
+    mainContent.removeEventListener('touchend', startMusic);
 }
-document.body.addEventListener('click', startMusic);
-document.body.addEventListener('touchend', startMusic); // plus fiable sur mobile
-
-// Forcer lecture dès que le fichier est prêt
-music.addEventListener('canplaythrough', () => {
-    if (music.currentTime < 15) { 
-        music.currentTime = 15;
-        music.play().catch(() => {});
-    }
-});
+mainContent.addEventListener('click', startMusic);
+mainContent.addEventListener('touchend', startMusic);
 
 // CŒURS animés
 function createHeart() {
