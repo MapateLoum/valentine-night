@@ -16,6 +16,7 @@ body {
     justify-content: center;
     align-items: center;
     color: #eee;
+    touch-action: manipulation; /* améliore le touch sur mobile */
 }
 
 /* CŒURS */
@@ -131,7 +132,6 @@ const photo = document.getElementById("photo");
 const music = document.getElementById("music");
 
 let attempts = 0;
-
 const texts = [
     "Hmm… vraiment ? 😏",
     "Tu essaies encore ? 😌",
@@ -140,7 +140,7 @@ const texts = [
     "Bon… on arrête là 😳"
 ];
 
-// Déplacement du bouton NON
+// Bouton NON qui fuit
 function moveButton() {
     attempts++;
     message.textContent = texts[Math.min(attempts - 1, texts.length - 1)];
@@ -160,7 +160,6 @@ function moveButton() {
     noBtn.style.left = x + "px";
     noBtn.style.top = y + "px";
 }
-
 noBtn.addEventListener("mouseover", moveButton);
 noBtn.addEventListener("touchstart", moveButton);
 
@@ -169,9 +168,9 @@ document.getElementById("yes").addEventListener("click", () => {
     message.textContent = "🌙💖 J’étais sûr(e) que tu dirais OUI 💖🌙";
 });
 
-// 🔊 Lecture automatique du son dès le premier clic/tap
+// 🔊 Musique qui démarre dès le premier tap/clic sur la page
 function startMusic() {
-    music.play().catch(() => {}); // ignore les erreurs si bloqué
+    music.play().catch(() => {});
     document.body.removeEventListener('click', startMusic);
     document.body.removeEventListener('touchstart', startMusic);
 }
