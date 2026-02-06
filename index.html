@@ -101,7 +101,7 @@ button {
 
 <body>
 
-<audio id="music" loop>
+<audio id="music" loop preload="auto">
     <source src="./music.mp3" type="audio/mpeg">
     Votre navigateur ne supporte pas la lecture audio.
 </audio>
@@ -168,14 +168,19 @@ document.getElementById("yes").addEventListener("click", () => {
     message.textContent = "🌙💖 J’étais sûr(e) que tu dirais OUI 💖🌙";
 });
 
-// 🔊 Musique qui démarre dès le premier tap/clic sur la page
+// 🔊 Lecture musique dès le premier tap/clic (mobile + PC)
 function startMusic() {
     music.play().catch(() => {});
     document.body.removeEventListener('click', startMusic);
-    document.body.removeEventListener('touchstart', startMusic);
+    document.body.removeEventListener('touchend', startMusic);
 }
 document.body.addEventListener('click', startMusic);
-document.body.addEventListener('touchstart', startMusic);
+document.body.addEventListener('touchend', startMusic); // plus fiable sur mobile
+
+// Forcer lecture dès que le fichier est prêt (optionnel)
+music.addEventListener('canplaythrough', () => {
+    music.play().catch(() => {});
+});
 
 // CŒURS animés
 function createHeart() {
