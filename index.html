@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Valentine 🌙💖</title>
+
+<style>
+body {
+    margin: 0;
+    height: 100vh;
+    font-family: 'Segoe UI', sans-serif;
+    background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
+    overflow: hidden;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: #eee;
+}
+
+/* CŒURS */
+.heart {
+    position: fixed;
+    top: -10px;
+    font-size: 18px;
+    animation: fall linear infinite;
+    opacity: 0.7;
+    z-index: 1;
+}
+@keyframes fall {
+    to { transform: translateY(110vh); }
+}
+
+.container {
+    background: rgba(20,20,30,0.95);
+    padding: 25px;
+    border-radius: 20px;
+    width: 90%;
+    max-width: 380px;
+    text-align: center;
+    box-shadow: 0 15px 40px rgba(0,0,0,0.6);
+    z-index: 2;
+}
+
+h1 {
+    color: #ff9db5;
+    font-size: 22px;
+    margin-bottom: 8px;
+}
+
+#message {
+    font-size: 14px;
+    color: #cfcfe6;
+    margin-bottom: 20px;
+    min-height: 20px;
+}
+
+/* ZONE DE JEU */
+.playground {
+    position: relative;
+    height: 160px;
+    border-radius: 15px;
+    margin-top: 10px;
+}
+
+/* BOUTONS */
+button {
+    padding: 12px 25px;
+    font-size: 16px;
+    border-radius: 25px;
+    border: none;
+    cursor: pointer;
+}
+
+#yes {
+    background: linear-gradient(135deg, #ff4d6d, #ff85a1);
+    color: white;
+    box-shadow: 0 8px 20px rgba(255,77,109,0.4);
+}
+
+#no {
+    background: #555;
+    color: #eee;
+    position: absolute;
+}
+
+.photo {
+    display: none;
+    margin-top: 15px;
+}
+
+.photo img {
+    width: 100%;
+    max-width: 220px;
+    border-radius: 15px;
+    margin-top: 10px;
+}
+</style>
+</head>
+
+<body>
+
+<audio id="music" loop>
+    <source src="./music.mp3" type="audio/mpeg">
+    Votre navigateur ne supporte pas la lecture audio.
+</audio>
+
+<div class="container">
+    <h1>Veux-tu être ma Valentine ? 🌙💖</h1>
+    <div id="message">Sous la lune… fais ton choix ✨</div>
+
+    <!-- Bouton OUI fixe -->
+    <button id="yes">Oui 💘</button>
+
+    <!-- Zone de jeu pour NON -->
+    <div class="playground" id="playground">
+        <button id="no">Non 😏</button>
+    </div>
+
+    <div class="photo" id="photo">
+        <p>Tu savais déjà la réponse… 💞</p>
+        <img src="photo.jpg">
+    </div>
+</div>
+
+<script>
+const noBtn = document.getElementById("no");
+const playground = document.getElementById("playground");
+const message = document.getElementById("message");
+const photo = document.getElementById("photo");
+const music = document.getElementById("music");
+
+let attempts = 0;
+
+const texts = [
+    "Hmm… vraiment ? 😏",
+    "Tu essaies encore ? 😌",
+    "Il fuit mais il rigole 😜",
+    "Avoue… c’est mignon 😍",
+    "Bon… on arrête là 😳"
+];
+
+// Déplacement du bouton NON
+function moveButton() {
+    attempts++;
+    message.textContent = texts[Math.min(attempts - 1, texts.length - 1)];
+
+    if (attempts >= 5) {
+        noBtn.style.display = "none";
+        photo.style.display = "block";
+        return;
+    }
+
+    const maxX = playground.clientWidth - noBtn.offsetWidth;
+    const maxY = playground.clientHeight - noBtn.offsetHeight;
+
+    const x = Math.random() * maxX;
+    const y = Math.random() * maxY;
+
+    noBtn.style.left = x + "px";
+    noBtn.style.top = y + "px";
+}
+
+noBtn.addEventListener("mouseover", moveButton);
+noBtn.addEventListener("touchstart", moveButton);
+
+// Bouton Oui
+document.getElementById("yes").addEventListener("click", () => {
+    message.textContent = "🌙💖 J’étais sûr(e) que tu dirais OUI 💖🌙";
+});
+
+// 🔊 Lecture automatique du son dès le premier clic/tap
+function startMusic() {
+    music.play().catch(() => {}); // ignore les erreurs si bloqué
+    document.body.removeEventListener('click', startMusic);
+    document.body.removeEventListener('touchstart', startMusic);
+}
+document.body.addEventListener('click', startMusic);
+document.body.addEventListener('touchstart', startMusic);
+
+// CŒURS animés
+function createHeart() {
+    const heart = document.createElement("div");
+    heart.className = "heart";
+    heart.textContent = "💜";
+    heart.style.left = Math.random() * 100 + "vw";
+    heart.style.animationDuration = (3 + Math.random() * 4) + "s";
+    document.body.appendChild(heart);
+    setTimeout(() => heart.remove(), 7000);
+}
+setInterval(createHeart, 350);
+</script>
+
+</body>
+</html>
