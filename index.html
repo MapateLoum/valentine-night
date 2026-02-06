@@ -19,7 +19,7 @@ body {
     touch-action: manipulation;
 }
 
-/* CŒURS */
+/* CŒURS de fond */
 .heart {
     position: fixed;
     top: -10px;
@@ -42,7 +42,12 @@ body {
     box-shadow: 0 15px 40px rgba(0,0,0,0.6);
     z-index: 2;
     opacity: 0;
-    transition: opacity 1s ease-in-out;
+    transition: opacity 1s ease-in-out, transform 1s ease-in-out;
+}
+
+.container.show {
+    opacity: 1;
+    transform: scale(1);
 }
 
 h1 {
@@ -73,7 +78,9 @@ button {
     border-radius: 25px;
     border: none;
     cursor: pointer;
+    transition: transform 0.2s ease;
 }
+button:hover { transform: scale(1.05); }
 
 #yes {
     background: linear-gradient(135deg, #ff4d6d, #ff85a1);
@@ -114,7 +121,7 @@ button {
     flex-direction: column;
     z-index: 9999;
     opacity: 1;
-    transition: opacity 1s ease-in-out; /* <-- transition du fade-out */
+    transition: opacity 1s ease-in-out;
 }
 
 #passwordOverlay input {
@@ -148,13 +155,19 @@ button {
     margin-top: 10px;
     font-size: 14px;
     min-height: 20px;
-    animation: blink 1s infinite;
     font-weight: bold;
 }
 
-@keyframes blink {
-    0%, 50%, 100% { opacity: 1; }
-    25%, 75% { opacity: 0.3; }
+/* Confettis */
+.confetti {
+    position: fixed;
+    width: 10px;
+    height: 10px;
+    background-color: red;
+    opacity: 0.8;
+    pointer-events: none;
+    z-index: 999;
+    border-radius: 50%;
 }
 </style>
 </head>
@@ -163,7 +176,7 @@ button {
 
 <!-- Overlay mot de passe -->
 <div id="passwordOverlay">
-    <h2>Entrez le mot de passe pour accéder 💖</h2>
+    <h2>Entrez le mot de passe 💖</h2>
     <input type="password" id="passwordInput" placeholder="Mot de passe">
     <button id="passwordBtn">Accéder</button>
     <div id="errorMessage"></div>
@@ -191,7 +204,7 @@ button {
 </div>
 
 <script>
-const PASSWORD = "passer2003"; // change ton mot de passe ici
+const PASSWORD = "passer2003"; // change le mot de passe
 const passwordOverlay = document.getElementById("passwordOverlay");
 const passwordInput = document.getElementById("passwordInput");
 const passwordBtn = document.getElementById("passwordBtn");
@@ -218,18 +231,12 @@ const texts = [
 // Vérifier mot de passe
 passwordBtn.addEventListener("click", () => {
     if(passwordInput.value === PASSWORD){
-        // Fade-out overlay
         passwordOverlay.style.opacity = 0;
-
-        // Attendre la fin du fade avant de cacher complètement
         setTimeout(() => {
             passwordOverlay.style.display = "none";
             mainContent.style.display = "block";
-
-            // fade-in
-            setTimeout(() => { mainContent.style.opacity = 1; }, 50);
+            setTimeout(() => mainContent.classList.add("show"), 50);
         }, 1000);
-
         errorMessage.textContent = "";
     } else {
         errorMessage.textContent = "💔 Mot de passe incorrect 💔";
@@ -240,41 +247,70 @@ passwordBtn.addEventListener("click", () => {
 function moveButton() {
     attempts++;
     message.textContent = texts[Math.min(attempts - 1, texts.length - 1)];
-
     if (attempts >= 5) {
         noBtn.style.display = "none";
         photo.style.display = "block";
         return;
     }
-
     const maxX = playground.clientWidth - noBtn.offsetWidth;
     const maxY = playground.clientHeight - noBtn.offsetHeight;
-
-    const x = Math.random() * maxX;
-    const y = Math.random() * maxY;
-
-    noBtn.style.left = x + "px";
-    noBtn.style.top = y + "px";
+    noBtn.style.left = Math.random() * maxX + "px";
+    noBtn.style.top = Math.random() * maxY + "px";
 }
 noBtn.addEventListener("mouseover", moveButton);
 noBtn.addEventListener("touchstart", moveButton);
 
-// Bouton Oui
+// Bouton Oui 💘 avec effets confettis + cœurs
 document.getElementById("yes").addEventListener("click", () => {
     message.textContent = "🌙💖 J’étais sûr(e) que tu dirais OUI 💖🌙";
+
+    // Explosion de confettis
+    for(let i=0;i<100;i++){
+        const c = document.createElement("div");
+        c.className = "confetti";
+        c.style.backgroundColor = `hsl(${Math.random()*360},100%,50%)`;
+        c.style.left = window.innerWidth/2 + "px";
+        c.style.top = window.innerHeight/2 + "px";
+        document.body.appendChild(c);
+        const xMove = (Math.random()-0.5)*500;
+        const yMove = (Math.random()-0.5)*500;
+        c.animate([
+            { transform: `translate(0,0) rotate(0deg)`, opacity: 1 },
+            { transform: `translate(${xMove}px,${yMove}px) rotate(${Math.random()*720}deg)`, opacity: 0 }
+        ], { duration: 2000, easing: 'ease-out' });
+        setTimeout(()=>c.remove(),2000);
+    }
+
+    // Explosion de cœurs
+    for(let i=0;i<50;i++){
+        const h = document.createElement("div");
+        h.className = "heart";
+        h.textContent = "💖";
+        h.style.fontSize = (10+Math.random()*20)+"px";
+        h.style.left = window.innerWidth/2 + "px";
+        h.style.top = window.innerHeight/2 + "px";
+        document.body.appendChild(h);
+        const xMove = (Math.random()-0.5)*400;
+        const yMove = (Math.random()-0.5)*400;
+        h.animate([
+            { transform: `translate(0,0)`, opacity: 1 },
+            { transform: `translate(${xMove}px,${yMove}px)`, opacity: 0 }
+        ], { duration: 2000, easing: 'ease-out' });
+        setTimeout(()=>h.remove(),2000);
+    }
 });
 
-// 🔊 Lecture musique dès le premier tap/clic sur le contenu, à partir de 15 secondes
+// 🔊 Musique démarrant à 15s après premier tap/clic
 function startMusic() {
     music.currentTime = 15;
-    music.play().catch(() => {});
+    music.play().catch(()=>{});
     mainContent.removeEventListener('click', startMusic);
     mainContent.removeEventListener('touchend', startMusic);
 }
 mainContent.addEventListener('click', startMusic);
 mainContent.addEventListener('touchend', startMusic);
 
-// CŒURS animés
+// CŒURS animés en fond
 function createHeart() {
     const heart = document.createElement("div");
     heart.className = "heart";
@@ -282,9 +318,9 @@ function createHeart() {
     heart.style.left = Math.random() * 100 + "vw";
     heart.style.animationDuration = (3 + Math.random() * 4) + "s";
     document.body.appendChild(heart);
-    setTimeout(() => heart.remove(), 7000);
+    setTimeout(()=>heart.remove(),7000);
 }
-setInterval(createHeart, 350);
+setInterval(createHeart,350);
 </script>
 
 </body>
